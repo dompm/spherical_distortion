@@ -15,13 +15,13 @@ from sphericaldistortion import crop_panorama, distort, undistort
 ### Crop from a 360 panorama
 
 ```
-crop = crop_panorama('data/quattro_canti.jpg', # panorama or path to panorama
-                     H=900, # height of the cropped image
-                     W=1200, # width of the cropped image
-                     f=1000, # focal length in pixels
-                     xi=0.5, # distortion parameter
+crop = crop_panorama('data/pano.jpg', # panorama or path to panorama
+                     height=900, # height of the cropped image
+                     width=1200, # width of the cropped image
+                     f=830, # focal length in pixels
+                     xi=0.75, # distortion parameter
                      az=0, # azimuth of the camera in radians
-                     el=-0.25, # elevation of the camera in radians
+                     el=-0.35, # elevation of the camera in radians
                      roll=0 # roll of the camera in radians
                      )
 ```
