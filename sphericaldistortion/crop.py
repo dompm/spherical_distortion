@@ -3,15 +3,15 @@ import numpy as np
 
 from .utils import minfocal, diskradius, interp2linear
 
-def crop_panorama(image360, H, W, f, xi, az, el, roll):
+def crop_panorama(image360, height, width, f, xi, az, el, roll):
     """Crop an image of a 360 degree panorama, given the camera parameters,
 
     Args:
-        image360 (str or np.ndarray): _description_
-        H (int): height of the cropped image
-        W (int): width of the cropped image
+        image360 (str or np.ndarray): image or path to image of a 360 degree panorama
+        height (int): height of the cropped image
+        width (int): width of the cropped image
         f (float): focal lenght of the camera in pixels
-        xi (float): distortion parameter following the spherical distortion model, usually in the range [0, 1]
+        xi (float): distortion parameter following the spherical distortion model
         az (float): azimuth of the camera in radians
         el (float): elevation of the camera in radians
         roll (float): roll of the camera in radians
@@ -23,10 +23,10 @@ def crop_panorama(image360, H, W, f, xi, az, el, roll):
     if isinstance(image360, str):
         image360 = imageio.imread(image360) #.astype('float32') / 255.
 
-    u0 = W / 2.
-    v0 = H / 2.
+    u0 = width / 2.
+    v0 = height / 2.
 
-    grid_x, grid_y = np.meshgrid(list(range(W)), list(range(H)))
+    grid_x, grid_y = np.meshgrid(list(range(width)), list(range(height)))
 
     ImPano_W = np.shape(image360)[1]
     ImPano_H = np.shape(image360)[0]
@@ -36,7 +36,7 @@ def crop_panorama(image360, H, W, f, xi, az, el, roll):
     fmin = minfocal(u0, v0, xi, x_ref, y_ref) # compute minimal focal length for the image to ve catadioptric with given xi
     
     # 1. Projection on the camera plane
-
+    
     X_Cam = np.divide(grid_x - u0, f)
     Y_Cam = -np.divide(grid_y - v0, f)
 
@@ -63,7 +63,7 @@ def crop_panorama(image360, H, W, f, xi, az, el, roll):
     sph = rot_roll.dot(rot_el.dot(coords))
     sph = rot_az.dot(sph)
 
-    sph = sph.reshape((3, H, W)).transpose((1,2,0))
+    sph = sph.reshape((3, height, width)).transpose((1,2,0))
     X_Sph, Y_Sph, Z_Sph = sph[:,:,0], sph[:,:,1], sph[:,:,2]
 
     # 4. cart 2 sph

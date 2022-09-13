@@ -6,7 +6,7 @@ def compute_fov(f, xi, width):
 
 # compute focal length from field of view and xi
 def compute_focal(fov, xi, width):
-    return width / 2 * (xi +np.cos(fov/2)) / np.sin(fov/2)
+    return width / 2 * (xi + np.cos(fov/2)) / np.sin(fov/2)
 
 # compute the minimum focal for the image to be catadioptric given xi
 def minfocal(u0, v0, xi, xref=1, yref=1):
@@ -21,7 +21,7 @@ def minfocal(u0, v0, xi, xref=1, yref=1):
 def diskradius(xi, f):
     return np.sqrt(-(f*f)/(1-xi*xi))
 
-def interp2linear(z, xi, yi, extrapval=np.nan):
+def interp2linear(z, xi, yi, extrapval=0):
 
     """
     Linear interpolation equivalent to interp2(z, xi, yi,'linear') in MATLAB
