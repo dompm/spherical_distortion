@@ -1,7 +1,9 @@
 import imageio.v2 as imageio
 import numpy as np
+import torch
+import torch.nn.functional as F
 
-from .utils import interp2linear, compute_fov, compute_focal
+from .utils import compute_fov, compute_focal
 
 def distort(im, f, xi):
     """Apply distortion to an image.
@@ -17,6 +19,8 @@ def distort(im, f, xi):
     
     if isinstance(im, str):
         im = imageio.imread(im)
+    
+    im = torch.tensor(im.astype(float))
 
     height, width, _ = im.shape
 
@@ -42,6 +46,12 @@ def distort(im, f, xi):
     X_d = X_Sph*f/Z_Sph + u0
     Y_d = Y_Sph*f/Z_Sph + v0
 
-    distorted_im = np.array(interp2linear(im, X_d, Y_d), dtype=np.uint8)
+    im = im.permute(2,0,1).unsqueeze(0)
 
-    return distorted_im.astype(np.uint8)
+    # change to torch grid sample format (from -1 to 1)
+    X_d = torch.tensor((X_d-width/2)/width*2)
+    Y_d = torch.tensor((Y_d-height/2)/height*2)
+
+    distorted_im = F.grid_sample(im, torch.stack((X_d, Y_d), dim=2).unsqueeze(0), mode='bilinear', padding_mode='zeros')
+
+    return distorted_im.squeeze().permute(1,2,0).numpy().astype(np.uint8)

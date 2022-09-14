@@ -1,7 +1,9 @@
 import imageio.v2 as imageio
 import numpy as np
+import torch
+import torch.nn.functional as F
 
-from .utils import interp2linear, compute_fov, compute_focal
+from .utils import compute_fov, compute_focal
 
 def undistort(im, f, xi):
     """Apply undistortion to an image.
@@ -17,6 +19,8 @@ def undistort(im, f, xi):
 
     if isinstance(im, str):
         im = imageio.imread(im)
+    
+    im = torch.tensor(im.astype(float))
 
     height, width, _ = im.shape
 
@@ -41,7 +45,13 @@ def undistort(im, f, xi):
 
     nx = X_Sph * f / (xi * np.sqrt(X_Sph**2 + Y_Sph**2 + Z_Sph**2) + Z_Sph) + u0
     ny = Y_Sph * f / (xi * np.sqrt(X_Sph**2 + Y_Sph**2 + Z_Sph**2) + Z_Sph) + v0
-    
-    undistorted_im = np.array(interp2linear(im, nx, ny), dtype=np.float)
 
-    return undistorted_im.astype(np.uint8)
+    im = im.permute(2,0,1).unsqueeze(0)
+
+    # change to torch grid sample format (from -1 to 1)
+    nx = torch.tensor((nx-width/2)/width*2)
+    ny = torch.tensor((ny-height/2)/height*2)
+    
+    undistorted_im = F.grid_sample(im, torch.stack((nx, ny), dim=2).unsqueeze(0), mode='bilinear', padding_mode='zeros')
+
+    return undistorted_im.squeeze().permute(1,2,0).numpy().astype(np.uint8)
