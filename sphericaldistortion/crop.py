@@ -1,4 +1,6 @@
-import imageio
+import torch
+import torch.nn.functional as F
+import imageio.v2 as imageio
 import numpy as np
 
 from .utils import minfocal, diskradius, interp2linear
@@ -22,6 +24,8 @@ def crop_panorama(image360, height, width, f, xi, az, el, roll):
 
     if isinstance(image360, str):
         image360 = imageio.imread(image360) #.astype('float32') / 255.
+
+    image360 = torch.tensor(image360.astype(float))
 
     u0 = width / 2.
     v0 = height / 2.
@@ -94,8 +98,16 @@ def crop_panorama(image360, height, width, f, xi, az, el, roll):
     ny = (1. / a)* (nphi - b)
 
     # 6. Final step interpolation and mapping
+    image360 = image360.permute(2,0,1).unsqueeze(0)
+    pano_height, pano_width = image360.shape[2:]
 
-    im = np.array(interp2linear(image360, nx, ny), dtype=np.uint8)
+    # change to torch grid sample format (from -1 to 1)
+    nx = torch.tensor((nx-pano_width/2)/pano_width*2)
+    ny = torch.tensor((ny-pano_height/2)/pano_height*2)
+
+    im = F.grid_sample(image360, torch.stack((nx, ny), dim=2).unsqueeze(0), mode='bilinear', padding_mode='zeros')
+
+    im = im.squeeze().permute(1,2,0).numpy().astype(np.uint8)
 
     if f < fmin:  # if it is a catadioptric image, apply mask and a disk in the middle
         r = diskradius(xi, f)
