@@ -3,7 +3,7 @@ import torch.nn.functional as F
 import imageio.v2 as imageio
 import numpy as np
 
-from .utils import minfocal, diskradius, interp2linear
+from .utils import minfocal, diskradius
 
 def crop_panorama(image360, height, width, f, xi, az, el, roll):
     """Crop an image of a 360 degree panorama, given the camera parameters,
