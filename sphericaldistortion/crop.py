@@ -31,6 +31,8 @@ def crop_panorama(image360, height, width, f, xi, az, el, roll):
     v0 = height / 2.
 
     grid_x, grid_y = np.meshgrid(list(range(width)), list(range(height)))
+    grid_x = grid_x + 0.5
+    grid_y = grid_y + 0.5
 
     ImPano_W = np.shape(image360)[1]
     ImPano_H = np.shape(image360)[0]
@@ -77,15 +79,15 @@ def crop_panorama(image360, height, width, f, xi, az, el, roll):
     pi = np.pi
 
     # 5. Sphere to pano
-    min_theta = -pi
-    max_theta = pi
-    min_phi = -pi / 2.
-    max_phi = pi / 2.
+    min_theta = -pi + 2*pi/ImPano_W
+    max_theta = pi - 2*pi/ImPano_W
+    min_phi = -pi / 2. + 0.5 * pi / ImPano_H
+    max_phi = pi / 2. - 0.5 * pi / ImPano_H
 
-    min_x = 0
-    max_x = ImPano_W - 1.0
-    min_y = 0
-    max_y = ImPano_H - 1.0
+    min_x = 0.
+    max_x = ImPano_W
+    min_y = 0.
+    max_y = ImPano_H
 
     ## for x
     a = (max_theta - min_theta) / (max_x - min_x)
