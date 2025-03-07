@@ -66,7 +66,7 @@ def crop_panorama(image360, height, width, f, xi, az, el, roll):
     rot_el = np.array([1., 0., 0., 0., np.cos(el), -np.sin(el), 0., np.sin(el), np.cos(el)]).reshape((3, 3))
     rot_az = np.array([np.cos(az), 0., np.sin(az), 0., 1., 0., -np.sin(az), 0., np.cos(az)]).reshape((3, 3))
     rot_roll = np.array([np.cos(roll), -np.sin(roll), 0., np.sin(roll), np.cos(roll), 0., 0., 0., 1.]).reshape((3, 3))
-    sph = rot_roll.dot(rot_el.dot(coords))
+    sph = rot_el.dot(rot_roll.dot(coords))
     sph = rot_az.dot(sph)
 
     sph = sph.reshape((3, height, width)).transpose((1,2,0))
